@@ -20,7 +20,7 @@ export default function AdminOrders() {
     <div className="min-h-screen bg-[#F7F8FA]">
       <Sidebar role="admin" />
 
-      <main className="lg:ml-[240px] p-6 lg:p-8">
+      <main className="lg:ml-[240px] p-6 pt-20 lg:p-8 lg:pt-8">
         <h1 className="text-[22px] font-bold text-[#111318] mb-6" style={{ fontFamily: 'Syne, sans-serif' }}>
           All Orders
         </h1>

@@ -20,7 +20,7 @@ export default function VendorDashboard() {
     <div className="min-h-screen bg-[#F7F8FA]">
       <Sidebar role="vendor" />
 
-      <main className="lg:ml-[240px] p-6 lg:p-8">
+      <main className="lg:ml-[240px] p-6 pt-20 lg:p-8 lg:pt-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <h1 className="text-2xl font-bold text-[#111318]" style={{ fontFamily: 'Syne, sans-serif' }}>
@@ -76,7 +76,8 @@ export default function VendorDashboard() {
             </button>
           </div>
 
-          <div className="bg-white rounded-xl border border-[#E4E6ED] overflow-hidden">
+          {/* Desktop Table */}
+          <div className="hidden lg:block bg-white rounded-xl border border-[#E4E6ED] overflow-hidden">
             <div className="grid grid-cols-12 gap-4 px-6 py-3 bg-[#F0F1F5] text-xs font-mono font-bold text-[#6B7280]">
               <div className="col-span-2">Order ID</div>
               <div className="col-span-2">Customer</div>
@@ -93,8 +94,9 @@ export default function VendorDashboard() {
                 <div className="col-span-2 text-sm font-mono font-bold">৳{order.total}</div>
                 <div className="col-span-2"><StatusChip status={order.status} /></div>
                 <div className="col-span-2">
+                <div className="relative">
                   <select
-                    className="text-xs border border-[#E4E6ED] rounded-lg px-2 py-1 focus:outline-none focus:border-[#E8321C]"
+                    className="w-full text-sm border border-[#E4E6ED] rounded-lg px-3 py-1.5 focus:outline-none focus:border-[#E8321C] bg-white appearance-none cursor-pointer"
                     defaultValue={order.status}
                     onChange={(e) => {
                       order.status = e.target.value as any;
@@ -106,6 +108,45 @@ export default function VendorDashboard() {
                     <option value="delivered">Delivered</option>
                     <option value="cancelled">Cancelled</option>
                   </select>
+                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-[#6B7280]">
+                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+                  </div>
+                </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Mobile Card Layout */}
+          <div className="lg:hidden space-y-3">
+            {recentOrders.map(order => (
+              <div key={order.id} className="bg-white rounded-xl border border-[#E4E6ED] p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-sm font-mono font-bold text-[#E8321C]">#{order.id}</span>
+                  <StatusChip status={order.status} />
+                </div>
+                <div className="space-y-2 text-sm mb-3">
+                  <div className="flex justify-between"><span className="text-[#6B7280]">Customer:</span> <span className="text-[#111318]">{order.customerName}</span></div>
+                  <div className="flex justify-between"><span className="text-[#6B7280]">Items:</span> <span className="text-[#111318]">{order.items.length}</span></div>
+                  <div className="flex justify-between"><span className="text-[#6B7280]">Total:</span> <span className="font-mono font-bold text-[#E8321C]">৳{order.total}</span></div>
+                </div>
+                <div className="relative">
+                  <select
+                    className="w-full text-sm border border-[#E4E6ED] rounded-lg px-4 py-2.5 focus:outline-none focus:border-[#E8321C] bg-white appearance-none cursor-pointer"
+                    defaultValue={order.status}
+                    onChange={(e) => {
+                      order.status = e.target.value as any;
+                    }}
+                  >
+                    <option value="pending">Processing</option>
+                    <option value="processing">Processing</option>
+                    <option value="shipped">Shipped</option>
+                    <option value="delivered">Delivered</option>
+                    <option value="cancelled">Cancelled</option>
+                  </select>
+                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-[#6B7280]">
+                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+                  </div>
                 </div>
               </div>
             ))}

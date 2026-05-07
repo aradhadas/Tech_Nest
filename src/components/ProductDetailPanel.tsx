@@ -56,7 +56,7 @@ export default function ProductDetailPanel({ product, onClose }: ProductDetailPa
           {/* Close */}
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 w-9 h-9 border border-[#E4E6ED] rounded-lg flex items-center justify-center text-[#6B7280] hover:text-[#E8321C] hover:border-[#E8321C] transition-colors z-10 bg-white"
+            className="absolute top-4 right-4 w-9 h-9 flex items-center justify-center rounded-lg bg-[#E8321C] text-white hover:bg-[#C5290F] transition-colors z-50 shadow-md"
           >
             <X size={18} />
           </button>
