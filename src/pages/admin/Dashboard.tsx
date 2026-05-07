@@ -43,7 +43,7 @@ export default function AdminDashboard() {
     <div className="min-h-screen bg-[#F7F8FA]">
       <Sidebar role="admin" />
 
-      <main className="lg:ml-[240px] p-6 lg:p-8">
+      <main className="lg:ml-[240px] p-6 pt-20 lg:p-8 lg:pt-8">
         <h1 className="text-2xl font-bold text-[#111318] mb-8" style={{ fontFamily: 'Syne, sans-serif' }}>
           Dashboard
         </h1>

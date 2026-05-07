@@ -64,7 +64,7 @@ export default function VendorProducts() {
     <div className="min-h-screen bg-[#F7F8FA]">
       <Sidebar role="vendor" />
 
-      <main className="lg:ml-[240px] p-6 lg:p-8">
+      <main className="lg:ml-[240px] p-6 pt-20 lg:p-8 lg:pt-8">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-[22px] font-bold text-[#111318]" style={{ fontFamily: 'Syne, sans-serif' }}>
             My Products
@@ -77,7 +77,8 @@ export default function VendorProducts() {
           </button>
         </div>
 
-        <div className="bg-white rounded-xl border border-[#E4E6ED] overflow-hidden">
+        {/* Desktop Table */}
+        <div className="hidden lg:block bg-white rounded-xl border border-[#E4E6ED] overflow-hidden">
           <div className="grid grid-cols-12 gap-4 px-6 py-3 bg-[#F0F1F5] text-xs font-mono font-bold text-[#6B7280]">
             <div className="col-span-3">Product Name</div>
             <div className="col-span-2">Category</div>
@@ -111,6 +112,52 @@ export default function VendorProducts() {
                 <button
                   onClick={() => toggleStatus(product.id)}
                   className="text-xs px-2 py-1 rounded border border-[#E4E6ED] hover:border-[#E8321C] hover:text-[#E8321C] transition-colors"
+                >
+                  {product.status === 'active' ? 'Deactivate' : 'Activate'}
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Mobile Card Layout */}
+        <div className="lg:hidden space-y-3">
+          {products.map(product => (
+            <div
+              key={product.id}
+              className={`bg-white rounded-xl border border-[#E4E6ED] p-4 ${
+                product.status === 'inactive' ? 'opacity-60' : ''
+              }`}
+            >
+              <div className="flex items-start justify-between mb-3">
+                <div className="flex-1">
+                  <h3 className="text-sm font-bold text-[#111318]">{product.name}</h3>
+                  <p className="text-xs text-[#6B7280]">
+                    {categories.find(c => c.id === product.category)?.icon} {categories.find(c => c.id === product.category)?.name}
+                  </p>
+                </div>
+                <StatusChip status={product.status} />
+              </div>
+              <div className="space-y-2 text-sm mb-3">
+                <div className="flex justify-between">
+                  <span className="text-[#6B7280]">Price:</span>
+                  <span className="font-mono font-bold text-[#E8321C]">৳{product.price}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-[#6B7280]">Stock:</span>
+                  <span className="font-mono">{product.stock}</span>
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => openEdit(product)}
+                  className="flex-1 flex items-center justify-center gap-1 py-2 px-3 text-xs border border-[#E4E6ED] rounded-lg text-[#6B7280] hover:border-[#E8321C] hover:text-[#E8321C] transition-colors"
+                >
+                  <Pencil size={14} /> Edit
+                </button>
+                <button
+                  onClick={() => toggleStatus(product.id)}
+                  className="flex-1 text-xs px-3 py-2 rounded-lg border border-[#E4E6ED] hover:border-[#E8321C] hover:text-[#E8321C] transition-colors"
                 >
                   {product.status === 'active' ? 'Deactivate' : 'Activate'}
                 </button>

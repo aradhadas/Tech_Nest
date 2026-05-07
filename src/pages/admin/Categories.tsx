@@ -56,7 +56,7 @@ export default function AdminCategories() {
     <div className="min-h-screen bg-[#F7F8FA]">
       <Sidebar role="admin" />
 
-      <main className="lg:ml-[240px] p-6 lg:p-8">
+      <main className="lg:ml-[240px] p-6 pt-20 lg:p-8 lg:pt-8">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-[22px] font-bold text-[#111318]" style={{ fontFamily: 'Syne, sans-serif' }}>
             Categories
