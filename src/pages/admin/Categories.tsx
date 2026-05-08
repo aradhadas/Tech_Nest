@@ -57,13 +57,13 @@ export default function AdminCategories() {
       <Sidebar role="admin" />
 
       <main className="lg:ml-[240px] p-6 pt-20 lg:p-8 lg:pt-8">
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex flex-col sm:flex-row sm:items-center items-start justify-between gap-4 mb-6">
           <h1 className="text-[22px] font-bold text-[#111318]" style={{ fontFamily: 'Syne, sans-serif' }}>
             Categories
           </h1>
           <button
             onClick={() => { setShowForm(!showForm); setEditingId(null); }}
-            className="bg-[#E8321C] text-white px-4 py-2.5 rounded-lg font-semibold text-sm hover:bg-[#C5290F] transition-colors flex items-center gap-2"
+            className="w-full sm:w-auto bg-[#E8321C] text-white px-4 py-2.5 rounded-lg font-semibold text-sm hover:bg-[#C5290F] transition-colors flex items-center justify-center sm:justify-start gap-2"
           >
             <Plus size={16} /> Add Category
           </button>

@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { ChevronDown, ChevronUp } from 'lucide-react';
-import { sampleOrders } from '@/data';
+import { useOrders } from '@/hooks/useOrders';
 import Navbar from '@/components/Navbar';
 import StatusChip from '@/components/StatusChip';
 
 export default function OrderHistory() {
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
+  const { orders } = useOrders();
 
   return (
     <div className="min-h-screen bg-white">
@@ -31,7 +32,7 @@ export default function OrderHistory() {
           </div>
 
           {/* Rows */}
-          {sampleOrders.map(order => {
+          {orders.map(order => {
             const isExpanded = expandedOrder === order.id;
             return (
               <div key={order.id} className="border-b border-[#E4E6ED] last:border-0">
@@ -45,7 +46,9 @@ export default function OrderHistory() {
                   >
                     #{order.id}
                   </div>
-                  <div className="col-span-2 text-sm text-[#6B7280]">{order.date}</div>
+                  <div className="col-span-2 text-sm text-[#6B7280]">
+                    {new Date(order.date).toLocaleDateString()}
+                  </div>
                   <div className="col-span-2 text-sm text-[#111318]">{order.items.length} item(s)</div>
                   <div
                     className="col-span-2 text-sm font-bold text-[#111318]"
@@ -77,9 +80,16 @@ export default function OrderHistory() {
                       ))}
                     </div>
                     {order.deliveryAddress && (
-                      <p className="text-xs text-[#6B7280] mt-3">
-                        <span className="font-medium">Delivery:</span> {order.deliveryAddress}
-                      </p>
+                      <div className="mt-3 space-y-1">
+                        <p className="text-xs text-[#6B7280]">
+                          <span className="font-medium">Delivery Address:</span> {order.deliveryAddress}
+                        </p>
+                        {order.deliveryPhone && (
+                          <p className="text-xs text-[#6B7280]">
+                            <span className="font-medium">Phone:</span> {order.deliveryPhone}
+                          </p>
+                        )}
+                      </div>
                     )}
                   </div>
                 )}

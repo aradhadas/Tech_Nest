@@ -10,13 +10,25 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({ product, onClick }: ProductCardProps) {
-  const { addToCart } = useCart();
+  const { addToCart, items } = useCart();
   const { addToast } = useToast();
   const category = categories.find(c => c.id === product.category);
   const specEntries = Object.entries(product.specs).slice(0, 2);
 
+  // Check how many of this product are already in cart
+  const cartItem = items.find(item => item.product.id === product.id);
+  const quantityInCart = cartItem ? cartItem.quantity : 0;
+  const remainingStock = product.stock - quantityInCart;
+  const isOutOfStock = remainingStock <= 0;
+
   const handleAdd = (e: React.MouseEvent) => {
     e.stopPropagation();
+    
+    if (isOutOfStock) {
+      addToast(`All available units are already in your cart`, 'error');
+      return;
+    }
+    
     addToCart(product);
     addToast(`Added ${product.name} to cart`, 'success');
   };
@@ -88,10 +100,17 @@ export default function ProductCard({ product, onClick }: ProductCardProps) {
           <p className="text-[11px] text-[#6B7280] mt-0.5" style={{ fontFamily: 'Inter, sans-serif' }}>
             {product.stock} units in stock
           </p>
+          {quantityInCart > 0 && (
+            <p className="text-[10px] text-[#E8321C] mt-0.5" style={{ fontFamily: 'Inter, sans-serif' }}>
+              {quantityInCart} in cart
+            </p>
+          )}
         </div>
         <button
           onClick={handleAdd}
-          className="w-9 h-9 rounded-full bg-[#E8321C] text-white flex items-center justify-center hover:bg-[#C5290F] transition-colors"
+          disabled={isOutOfStock}
+          className="w-9 h-9 rounded-full bg-[#E8321C] text-white flex items-center justify-center hover:bg-[#C5290F] transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+          title={isOutOfStock ? 'All units in cart' : 'Add to cart'}
         >
           <ShoppingCart size={15} />
         </button>

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, User, Store, Shield } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import PixelArcLogo from '@/components/PixelArcLogo';
 import type { UserRole } from '@/types';
@@ -14,23 +14,25 @@ export default function Login() {
   const [role, setRole] = useState<UserRole>('customer');
   const [error, setError] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    const success = login(email, password, role);
-    if (success) {
-      if (role === 'customer') navigate('/customer/home');
-      else if (role === 'vendor') navigate('/vendor/dashboard');
-      else if (role === 'admin') navigate('/admin/dashboard');
+    
+    const result = await login(email, password);
+    
+    if (result.success) {
+      // Navigation will be handled by AuthContext based on user role
+      // For now, just redirect to customer home
+      navigate('/customer/home');
     } else {
-      setError('Invalid credentials. Try customer@demo.com / vendor@demo.com / admin@demo.com');
+      setError(result.error || 'Invalid credentials');
     }
   };
 
-  const roleHints: { role: UserRole; label: string; emoji: string }[] = [
-    { role: 'customer', label: 'Customer', emoji: '\u{1F6CD}' },
-    { role: 'vendor', label: 'Vendor', emoji: '\u{1F3EA}' },
-    { role: 'admin', label: 'Admin', emoji: '\u{1F527}' },
+  const roleHints: { role: UserRole; label: string; icon: React.ReactNode }[] = [
+    { role: 'customer', label: 'Customer', icon: <User size={13} /> },
+    { role: 'vendor', label: 'Vendor', icon: <Store size={13} /> },
+    { role: 'admin', label: 'Admin', icon: <Shield size={13} /> },
   ];
 
   const quickLogin = (demoEmail: string, demoRole: UserRole) => {
@@ -128,12 +130,13 @@ export default function Login() {
         </p>
 
         {/* Demo login buttons */}
-        <div className="mt-4 pt-4 border-t border-[#E4E6ED]">
-          <p className="text-[11px] text-[#B0B7C3] text-center mb-2">Quick Login (click to fill)</p>
-          <div className="flex gap-2 justify-center">
+        <div className="mt-5 pt-5 border-t border-[#E4E6ED]">
+          <p className="text-[11px] font-semibold text-[#8B93A6] tracking-wider uppercase text-center mb-3">Quick Sign In Form</p>
+          <div className="flex rounded-lg border border-[#E4E6ED] p-1 bg-[#F7F8FA]">
             {roleHints.map(h => (
               <button
                 key={h.role}
+                type="button"
                 onClick={() => {
                   const emailMap: Record<string, string> = {
                     customer: 'customer@demo.com',
@@ -143,13 +146,14 @@ export default function Login() {
                   quickLogin(emailMap[h.role], h.role);
                 }}
                 onMouseEnter={() => setRole(h.role)}
-                className={`text-[11px] px-3 py-1.5 rounded-full border transition-colors ${
+                className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-md text-[11px] font-semibold transition-all duration-200 ${
                   role === h.role
-                    ? 'border-[#E8321C] bg-[#FFF0EE] text-[#E8321C]'
-                    : 'border-[#E4E6ED] text-[#6B7280] hover:border-[#E8321C] hover:text-[#E8321C]'
+                    ? 'bg-white text-[#111318] shadow-sm ring-1 ring-black/5'
+                    : 'text-[#6B7280] hover:text-[#111318]'
                 }`}
               >
-                {h.emoji} {h.label}
+                {h.icon}
+                {h.label}
               </button>
             ))}
           </div>

@@ -3,12 +3,17 @@ import { useNavigate } from 'react-router-dom';
 import { Check, ArrowRight } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { useOrders } from '@/hooks/useOrders';
+import { useToast } from '@/contexts/ToastContext';
 import Navbar from '@/components/Navbar';
 
 export default function Checkout() {
   const navigate = useNavigate();
   const { items, totalPrice, clearCart } = useCart();
   const { user } = useAuth();
+  const { createOrder } = useOrders();
+  const { addToast } = useToast();
+  const [isPlacingOrder, setIsPlacingOrder] = useState(false);
   const [form, setForm] = useState({
     name: user?.name || '',
     phone: user?.phone || '',
@@ -21,11 +26,62 @@ export default function Checkout() {
     setForm(prev => ({ ...prev, [field]: value }));
   };
 
-  const handlePlaceOrder = () => {
-    if (!form.name || !form.phone || !form.address) return;
-    const orderId = 'TN-' + Math.floor(100000 + Math.random() * 900000);
-    clearCart();
-    navigate('/customer/confirmation', { state: { orderId, items, total: totalPrice } });
+  const handlePlaceOrder = async () => {
+    if (!form.name || !form.phone || !form.address) {
+      addToast('Please fill in all required fields', 'error');
+      return;
+    }
+
+    setIsPlacingOrder(true);
+
+    try {
+      const fullAddress = `${form.address}, ${form.city || ''} ${form.postalCode || ''}`.trim();
+      
+      const { data, error } = await createOrder({
+        customerId: user?.id || null,
+        customerName: form.name,
+        items: items,
+        total: totalPrice,
+        status: 'pending',
+        date: new Date().toISOString(),
+        deliveryAddress: fullAddress,
+        deliveryPhone: form.phone,
+        vendorId: undefined,
+      });
+
+      if (error) {
+        addToast(error, 'error');
+        setIsPlacingOrder(false);
+        return;
+      }
+
+      // Update stock for each product
+      await updateProductStocks();
+
+      clearCart();
+      navigate('/customer/confirmation', { 
+        state: { 
+          orderId: data?.id, 
+          items, 
+          total: totalPrice 
+        } 
+      });
+    } catch (err) {
+      addToast('Failed to place order', 'error');
+      setIsPlacingOrder(false);
+    }
+  };
+
+  const updateProductStocks = async () => {
+    const { supabase } = await import('@/lib/supabase');
+    
+    for (const item of items) {
+      const newStock = item.product.stock - item.quantity;
+      await supabase
+        .from('products')
+        .update({ stock: newStock })
+        .eq('id', item.product.id);
+    }
   };
 
   if (items.length === 0) {
@@ -161,10 +217,11 @@ export default function Checkout() {
 
               <button
                 onClick={handlePlaceOrder}
-                className="w-full mt-5 bg-[#E8321C] text-white py-3.5 rounded-lg font-bold hover:bg-[#C5290F] transition-colors"
+                disabled={isPlacingOrder}
+                className="w-full mt-5 bg-[#E8321C] text-white py-3.5 rounded-lg font-bold hover:bg-[#C5290F] transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
                 style={{ fontFamily: 'Syne, sans-serif' }}
               >
-                Place Order
+                {isPlacingOrder ? 'Placing Order...' : 'Place Order'}
               </button>
             </div>
           </div>

@@ -1,5 +1,4 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
 import ToastContainer from '@/components/ToastContainer';
 
 // Auth pages
@@ -26,24 +25,6 @@ import AdminVendors from '@/pages/admin/Vendors';
 import AdminCategories from '@/pages/admin/Categories';
 import AdminOrders from '@/pages/admin/Orders';
 
-function ProtectedRoute({ children, allowedRole }: { children: React.ReactNode; allowedRole: string }) {
-  const { user } = useAuth();
-
-  if (!user) {
-    return <Navigate to="/login" replace />;
-  }
-
-  if (user.role !== allowedRole) {
-    // Redirect to appropriate home
-    if (user.role === 'customer') return <Navigate to="/customer/home" replace />;
-    if (user.role === 'vendor') return <Navigate to="/vendor/dashboard" replace />;
-    if (user.role === 'admin') return <Navigate to="/admin/dashboard" replace />;
-    return <Navigate to="/login" replace />;
-  }
-
-  return <>{children}</>;
-}
-
 function App() {
   return (
     <>
@@ -52,29 +33,29 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
 
-        {/* Customer routes */}
-        <Route path="/customer/home" element={<ProtectedRoute allowedRole="customer"><CustomerHome /></ProtectedRoute>} />
-        <Route path="/customer/cart" element={<ProtectedRoute allowedRole="customer"><Cart /></ProtectedRoute>} />
-        <Route path="/customer/checkout" element={<ProtectedRoute allowedRole="customer"><Checkout /></ProtectedRoute>} />
-        <Route path="/customer/confirmation" element={<ProtectedRoute allowedRole="customer"><OrderConfirmation /></ProtectedRoute>} />
-        <Route path="/customer/orders" element={<ProtectedRoute allowedRole="customer"><OrderHistory /></ProtectedRoute>} />
-        <Route path="/customer/profile" element={<ProtectedRoute allowedRole="customer"><Profile /></ProtectedRoute>} />
+        {/* Customer routes - No auth required for now */}
+        <Route path="/customer/home" element={<CustomerHome />} />
+        <Route path="/customer/cart" element={<Cart />} />
+        <Route path="/customer/checkout" element={<Checkout />} />
+        <Route path="/customer/confirmation" element={<OrderConfirmation />} />
+        <Route path="/customer/orders" element={<OrderHistory />} />
+        <Route path="/customer/profile" element={<Profile />} />
 
-        {/* Vendor routes */}
-        <Route path="/vendor/dashboard" element={<ProtectedRoute allowedRole="vendor"><VendorDashboard /></ProtectedRoute>} />
-        <Route path="/vendor/products" element={<ProtectedRoute allowedRole="vendor"><VendorProducts /></ProtectedRoute>} />
-        <Route path="/vendor/orders" element={<ProtectedRoute allowedRole="vendor"><VendorOrders /></ProtectedRoute>} />
+        {/* Vendor routes - No auth required for now */}
+        <Route path="/vendor/dashboard" element={<VendorDashboard />} />
+        <Route path="/vendor/products" element={<VendorProducts />} />
+        <Route path="/vendor/orders" element={<VendorOrders />} />
 
-        {/* Admin routes */}
-        <Route path="/admin/dashboard" element={<ProtectedRoute allowedRole="admin"><AdminDashboard /></ProtectedRoute>} />
-        <Route path="/admin/users" element={<ProtectedRoute allowedRole="admin"><AdminUsers /></ProtectedRoute>} />
-        <Route path="/admin/vendors" element={<ProtectedRoute allowedRole="admin"><AdminVendors /></ProtectedRoute>} />
-        <Route path="/admin/categories" element={<ProtectedRoute allowedRole="admin"><AdminCategories /></ProtectedRoute>} />
-        <Route path="/admin/orders" element={<ProtectedRoute allowedRole="admin"><AdminOrders /></ProtectedRoute>} />
+        {/* Admin routes - No auth required for now */}
+        <Route path="/admin/dashboard" element={<AdminDashboard />} />
+        <Route path="/admin/users" element={<AdminUsers />} />
+        <Route path="/admin/vendors" element={<AdminVendors />} />
+        <Route path="/admin/categories" element={<AdminCategories />} />
+        <Route path="/admin/orders" element={<AdminOrders />} />
 
-        {/* Redirect root */}
-        <Route path="/" element={<Navigate to="/login" replace />} />
-        <Route path="*" element={<Navigate to="/login" replace />} />
+        {/* Redirect root to customer home */}
+        <Route path="/" element={<Navigate to="/customer/home" replace />} />
+        <Route path="*" element={<Navigate to="/customer/home" replace />} />
       </Routes>
 
       <ToastContainer />

@@ -1,25 +1,32 @@
 import { useState } from 'react';
-import { Plus, Pencil, X } from 'lucide-react';
-import { products as allProducts, categories } from '@/data';
+import { Plus, Pencil, X, Upload } from 'lucide-react';
+import { categories } from '@/data';
+import { useProducts } from '@/hooks/useProducts';
 import Sidebar from '@/components/Sidebar';
 import StatusChip from '@/components/StatusChip';
 import { useToast } from '@/contexts/ToastContext';
+import { uploadFile } from '@/lib/supabase';
 import type { Product, ProductSpecs } from '@/types';
 
 export default function VendorProducts() {
   const { addToast } = useToast();
-  const [products, setProducts] = useState<Product[]>(allProducts);
+  const { products, updateProduct: updateProductDB, addProduct: addProductDB, refetch } = useProducts(false);
   const [showPanel, setShowPanel] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [form, setForm] = useState<Partial<Product>>({
     name: '', category: 'cat-001', brand: 'TechNest Labs', price: 0, stock: 0, status: 'active', specs: {}, description: ''
   });
   const [specs, setSpecs] = useState<[string, string][]>([['', '']]);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
 
   const openAdd = () => {
     setEditingProduct(null);
     setForm({ name: '', category: 'cat-001', brand: 'TechNest Labs', price: 0, stock: 0, status: 'active', specs: {}, description: '' });
     setSpecs([['', '']]);
+    setImageFile(null);
+    setImagePreview(null);
     setShowPanel(true);
   };
 
@@ -27,19 +34,54 @@ export default function VendorProducts() {
     setEditingProduct(product);
     setForm({ ...product });
     setSpecs(Object.entries(product.specs));
+    setImageFile(null);
+    setImagePreview(product.image || null);
     setShowPanel(true);
   };
 
-  const saveProduct = () => {
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setImageFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const saveProduct = async () => {
+    setUploading(true);
     const specsObj: ProductSpecs = {};
     specs.forEach(([k, v]) => { if (k && v) specsObj[k] = v; });
 
+    let imageUrl: string | undefined = form.image || undefined;
+
+    // Upload image if a new file is selected
+    if (imageFile) {
+      const fileName = `${Date.now()}-${imageFile.name}`;
+      const { url, error: uploadError } = await uploadFile('product-image', fileName, imageFile);
+      
+      if (uploadError) {
+        addToast(`Image upload failed: ${uploadError.message}`, 'error');
+        setUploading(false);
+        return;
+      }
+      
+      imageUrl = url || undefined;
+    }
+
     if (editingProduct) {
-      setProducts(prev => prev.map(p => p.id === editingProduct.id ? { ...p, ...form, specs: specsObj } as Product : p));
+      const { error } = await updateProductDB(editingProduct.id, { ...form, specs: specsObj, image: imageUrl });
+      if (error) {
+        addToast(error, 'error');
+        setUploading(false);
+        return;
+      }
       addToast('Product updated', 'success');
     } else {
-      const newProduct: Product = {
-        id: `p${Date.now()}`,
+      const newProduct = {
         name: form.name || 'New Product',
         price: form.price || 0,
         stock: form.stock || 0,
@@ -47,17 +89,36 @@ export default function VendorProducts() {
         brand: form.brand || 'TechNest Labs',
         specs: specsObj,
         description: form.description || '',
-        status: form.status as 'active' | 'inactive' || 'active',
+        status: (form.status as 'active' | 'inactive') || 'active',
+        image: imageUrl,
       };
-      setProducts(prev => [newProduct, ...prev]);
+      const { error } = await addProductDB(newProduct);
+      if (error) {
+        addToast(error, 'error');
+        setUploading(false);
+        return;
+      }
       addToast('Product added', 'success');
     }
+    setUploading(false);
+    refetch();
     setShowPanel(false);
   };
 
-  const toggleStatus = (id: string) => {
-    setProducts(prev => prev.map(p => p.id === id ? { ...p, status: p.status === 'active' ? 'inactive' : 'active' as 'active' | 'inactive' } : p));
+  const toggleStatus = async (id: string) => {
+    const product = products.find(p => p.id === id);
+    if (!product) return;
+
+    const newStatus = product.status === 'active' ? 'inactive' : 'active';
+    const { error } = await updateProductDB(id, { status: newStatus });
+    
+    if (error) {
+      addToast(error, 'error');
+      return;
+    }
+    
     addToast('Status updated', 'success');
+    refetch();
   };
 
   return (
@@ -65,13 +126,13 @@ export default function VendorProducts() {
       <Sidebar role="vendor" />
 
       <main className="lg:ml-[240px] p-6 pt-20 lg:p-8 lg:pt-8">
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex flex-col sm:flex-row sm:items-center items-start justify-between gap-4 mb-6">
           <h1 className="text-[22px] font-bold text-[#111318]" style={{ fontFamily: 'Syne, sans-serif' }}>
             My Products
           </h1>
           <button
             onClick={openAdd}
-            className="bg-[#E8321C] text-white px-4 py-2.5 rounded-lg font-semibold text-sm hover:bg-[#C5290F] transition-colors flex items-center gap-2"
+            className="w-full sm:w-auto bg-[#E8321C] text-white px-4 py-2.5 rounded-lg font-semibold text-sm hover:bg-[#C5290F] transition-colors flex items-center justify-center sm:justify-start gap-2"
           >
             <Plus size={16} /> Add Product
           </button>
@@ -234,6 +295,34 @@ export default function VendorProducts() {
                   />
                 </div>
 
+                {/* Image Upload */}
+                <div>
+                  <label className="text-xs text-[#6B7280] mb-1 block">Product Image</label>
+                  <div className="space-y-2">
+                    {imagePreview && (
+                      <div className="relative w-full h-40 bg-[#F7F8FA] border border-[#E4E6ED] rounded-lg overflow-hidden">
+                        <img 
+                          src={imagePreview} 
+                          alt="Preview" 
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    )}
+                    <label className="flex items-center justify-center gap-2 w-full bg-[#F7F8FA] border border-[#E4E6ED] rounded-lg px-4 py-3 text-sm cursor-pointer hover:border-[#E8321C] transition-colors">
+                      <Upload size={16} className="text-[#6B7280]" />
+                      <span className="text-[#6B7280]">
+                        {imageFile ? imageFile.name : 'Choose image file'}
+                      </span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageChange}
+                        className="hidden"
+                      />
+                    </label>
+                  </div>
+                </div>
+
                 {/* Specs */}
                 <div>
                   <label className="text-xs text-[#6B7280] mb-2 block">Specifications</label>
@@ -292,10 +381,11 @@ export default function VendorProducts() {
 
                 <button
                   onClick={saveProduct}
-                  className="w-full bg-[#E8321C] text-white py-3 rounded-lg font-bold hover:bg-[#C5290F] transition-colors mt-4"
+                  disabled={uploading}
+                  className="w-full bg-[#E8321C] text-white py-3 rounded-lg font-bold hover:bg-[#C5290F] transition-colors mt-4 disabled:opacity-50 disabled:cursor-not-allowed"
                   style={{ fontFamily: 'Syne, sans-serif' }}
                 >
-                  Save Product
+                  {uploading ? 'Saving...' : 'Save Product'}
                 </button>
               </div>
             </div>
