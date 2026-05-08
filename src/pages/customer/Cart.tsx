@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { Minus, Plus, X, ShoppingCart, ArrowRight } from 'lucide-react';
+import { Minus, Plus, X, ShoppingCart, ArrowRight, ArrowLeft } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import Navbar from '@/components/Navbar';
 
@@ -12,6 +12,15 @@ export default function Cart() {
       <Navbar searchQuery="" onSearchChange={() => {}} />
 
       <div className="max-w-[960px] mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        {/* Back Button */}
+        <button
+          onClick={() => navigate('/customer/home')}
+          className="flex items-center gap-2 text-[#6B7280] hover:text-[#E8321C] mb-4 transition-colors"
+        >
+          <ArrowLeft size={20} />
+          <span className="font-medium">Continue Shopping</span>
+        </button>
+
         <h1
           className="text-[28px] font-bold text-[#111318]"
           style={{ fontFamily: 'Syne, sans-serif' }}

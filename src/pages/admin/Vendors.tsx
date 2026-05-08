@@ -81,30 +81,30 @@ export default function AdminVendors() {
               </div>
             )}
             {pendingVendors.map(vendor => (
-              <div key={vendor.id} className="bg-white border border-[#E4E6ED] rounded-xl p-5" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
-                <div className="flex items-start justify-between">
+              <div key={vendor.id} className="bg-white border border-[#E4E6ED] rounded-xl p-4 lg:p-5" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
+                <div className="flex flex-col lg:flex-row items-start justify-between gap-4 lg:gap-0">
                   <div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-2 mb-1">
                       <h3 className="text-base font-bold text-[#111318]" style={{ fontFamily: 'Syne, sans-serif' }}>
                         {vendor.storeName}
                       </h3>
-                      <span className="text-xs text-[#B0B7C3]">Applied recently</span>
+                      <span className="text-[11px] bg-[#F0F1F5] text-[#6B7280] px-2 py-0.5 rounded-full">Applied recently</span>
                     </div>
-                    <p className="text-sm text-[#6B7280] mt-1">
-                      {vendor.email} · {vendor.phone}
+                    <p className="text-sm text-[#6B7280]">
+                      {vendor.email} <span className="hidden sm:inline">·</span> <br className="sm:hidden" /> {vendor.phone}
                     </p>
-                    <p className="text-sm text-[#6B7280] mt-2">{vendor.storeDescription}</p>
+                    <p className="text-[13px] text-[#6B7280] mt-2 line-clamp-2">{vendor.storeDescription}</p>
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 w-full lg:w-auto">
                     <button
                       onClick={() => handleReject(vendor.id)}
-                      className="flex items-center gap-1 px-4 py-2 border border-[#E4E6ED] rounded-lg text-sm font-medium text-[#111318] hover:border-[#E8321C] hover:text-[#E8321C] transition-colors"
+                      className="flex-1 lg:flex-none flex items-center justify-center gap-1.5 px-4 py-2 border border-[#E4E6ED] rounded-lg text-sm font-medium text-[#111318] hover:border-[#E8321C] hover:text-[#E8321C] transition-colors"
                     >
                       <XCircle size={15} /> Reject
                     </button>
                     <button
                       onClick={() => handleApprove(vendor.id)}
-                      className="flex items-center gap-1 px-4 py-2 bg-[#E8321C] rounded-lg text-sm font-medium text-white hover:bg-[#C5290F] transition-colors"
+                      className="flex-1 lg:flex-none flex items-center justify-center gap-1.5 px-4 py-2 bg-[#E8321C] rounded-lg text-sm font-medium text-white hover:bg-[#C5290F] transition-colors"
                     >
                       <CheckCircle size={15} /> Approve
                     </button>
@@ -117,47 +117,71 @@ export default function AdminVendors() {
 
         {/* All Vendors Tab */}
         {activeTab === 'all' && (
-          <div className="bg-white rounded-xl border border-[#E4E6ED] overflow-hidden">
-            <div className="grid grid-cols-12 gap-4 px-6 py-3 bg-[#F0F1F5] text-xs font-mono font-bold text-[#6B7280]">
+          <div className="space-y-4 lg:space-y-0">
+            {/* Desktop Table Header */}
+            <div className="hidden lg:grid grid-cols-12 gap-4 px-6 py-3 bg-[#F0F1F5] text-xs font-mono font-bold text-[#6B7280] rounded-t-xl border border-[#E4E6ED] border-b-0">
               <div className="col-span-3">Store Name</div>
               <div className="col-span-2">Owner</div>
               <div className="col-span-2">Status</div>
               <div className="col-span-2">Joined</div>
               <div className="col-span-3">Actions</div>
             </div>
-            {allVendors.map(vendor => (
-              <div key={vendor.id} className="grid grid-cols-12 gap-4 px-6 py-4 border-b border-[#E4E6ED] last:border-0 items-center">
-                <div className="col-span-3 text-sm font-bold text-[#111318]">{vendor.storeName}</div>
-                <div className="col-span-2 text-sm text-[#6B7280]">{vendor.name}</div>
-                <div className="col-span-2">
-                  <StatusChip status={vendor.approvalStatus || 'pending'} />
+            
+            {/* Table Body / Mobile Cards */}
+            <div className="lg:bg-white lg:border lg:border-[#E4E6ED] lg:rounded-b-xl lg:overflow-hidden space-y-4 lg:space-y-0">
+              {allVendors.map(vendor => (
+                <div key={vendor.id} className="bg-white border border-[#E4E6ED] rounded-lg lg:rounded-none lg:border-x-0 lg:border-t-0 p-4 lg:p-6 lg:grid lg:grid-cols-12 lg:gap-4 lg:items-center">
+                  
+                  <div className="flex justify-between items-start lg:block lg:col-span-3 mb-2 lg:mb-0">
+                    <div>
+                      <span className="lg:hidden text-[10px] uppercase font-bold text-[#8B93A6] block mb-1">Store Name</span>
+                      <div className="text-sm font-bold text-[#111318]">{vendor.storeName}</div>
+                    </div>
+                    <div className="lg:hidden">
+                      <StatusChip status={vendor.approvalStatus || 'pending'} />
+                    </div>
+                  </div>
+
+                  <div className="lg:col-span-2 mb-2 lg:mb-0">
+                    <span className="lg:hidden text-[10px] uppercase font-bold text-[#8B93A6] block mb-0.5">Owner</span>
+                    <div className="text-sm text-[#6B7280]">{vendor.name}</div>
+                  </div>
+                  
+                  <div className="hidden lg:block lg:col-span-2">
+                    <StatusChip status={vendor.approvalStatus || 'pending'} />
+                  </div>
+                  
+                  <div className="lg:col-span-2 flex justify-between items-center lg:block mt-3 lg:mt-0 pt-3 lg:pt-0 border-t border-[#E4E6ED]/60 lg:border-t-0">
+                    <span className="lg:hidden text-[10px] uppercase font-bold text-[#8B93A6]">Joined Date</span>
+                    <div className="text-sm font-mono text-[#6B7280]">{vendor.joinedDate}</div>
+                  </div>
+                  
+                  <div className="lg:col-span-3 mt-3 lg:mt-0">
+                    {vendor.status === 'active' ? (
+                      <button
+                        onClick={() => {
+                          vendor.status = 'suspended';
+                          addToast('Vendor suspended', 'info');
+                        }}
+                        className="w-full lg:w-auto text-xs font-semibold px-4 py-2 border border-[#E4E6ED] rounded-lg hover:border-[#E8321C] hover:text-[#E8321C] transition-colors"
+                      >
+                        Suspend Vendor
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => {
+                          vendor.status = 'active';
+                          addToast('Vendor reactivated', 'success');
+                        }}
+                        className="w-full lg:w-auto text-xs font-semibold px-4 py-2 bg-[#E8321C] text-white rounded-lg hover:bg-[#C5290F] transition-colors"
+                      >
+                        Reactivate Vendor
+                      </button>
+                    )}
+                  </div>
                 </div>
-                <div className="col-span-2 text-sm font-mono text-[#6B7280]">{vendor.joinedDate}</div>
-                <div className="col-span-3 flex gap-2">
-                  {vendor.status === 'active' ? (
-                    <button
-                      onClick={() => {
-                        vendor.status = 'suspended';
-                        addToast('Vendor suspended', 'info');
-                      }}
-                      className="text-xs px-3 py-1.5 border border-[#E4E6ED] rounded-lg hover:border-[#E8321C] hover:text-[#E8321C] transition-colors"
-                    >
-                      Suspend
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => {
-                        vendor.status = 'active';
-                        addToast('Vendor reactivated', 'success');
-                      }}
-                      className="text-xs px-3 py-1.5 bg-[#E8321C] text-white rounded-lg hover:bg-[#C5290F] transition-colors"
-                    >
-                      Reactivate
-                    </button>
-                  )}
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         )}
       </main>

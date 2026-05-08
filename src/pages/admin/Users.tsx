@@ -156,7 +156,7 @@ export default function AdminUsers() {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-[#6B7280]">Joined:</span>
-                    <span className="text-[#111318]">{new Date(user.createdAt).toLocaleDateString()}</span>
+                    <span className="text-[#111318]">{user.joinedDate ? new Date(user.joinedDate).toLocaleDateString() : 'N/A'}</span>
                   </div>
                 </div>
                 <button

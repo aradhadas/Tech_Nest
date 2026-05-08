@@ -12,7 +12,7 @@ interface ProductDetailPanelProps {
 }
 
 export default function ProductDetailPanel({ product, onClose }: ProductDetailPanelProps) {
-  const { addToCart, items } = useCart();
+  const { addToCart } = useCart();
   const { addToast } = useToast();
   const [quantity, setQuantity] = useState(1);
 
@@ -22,17 +22,7 @@ export default function ProductDetailPanel({ product, onClose }: ProductDetailPa
   const specEntries = Object.entries(product.specs);
   const stockStatus = product.stock > 5 ? 'active' : 'inactive';
 
-  // Check how many of this product are already in cart
-  const cartItem = items.find(item => item.product.id === product.id);
-  const quantityInCart = cartItem ? cartItem.quantity : 0;
-  const remainingStock = product.stock - quantityInCart;
-  const maxQuantity = Math.max(0, remainingStock);
-
   const handleAdd = () => {
-    if (quantity > remainingStock) {
-      addToast(`Only ${remainingStock} units available (${quantityInCart} already in cart)`, 'error');
-      return;
-    }
     addToCart(product, quantity);
     addToast(`Added ${quantity} × ${product.name} to cart`, 'success');
     setQuantity(1);
@@ -103,25 +93,13 @@ export default function ProductDetailPanel({ product, onClose }: ProductDetailPa
             <StatusChip status={stockStatus as 'active' | 'inactive'} />
           </div>
 
-          {/* Price & Stock */}
-          <div className="flex items-center justify-between mt-4">
-            <p
-              className="text-[28px] font-bold text-[#E8321C]"
-              style={{ fontFamily: 'JetBrains Mono, monospace' }}
-            >
-              ৳{product.price}
-            </p>
-            <div className="text-right">
-              <p className="text-sm text-[#6B7280]">
-                <span className="font-semibold">{product.stock}</span> units in stock
-              </p>
-              {quantityInCart > 0 && (
-                <p className="text-xs text-[#E8321C]">
-                  {quantityInCart} in cart
-                </p>
-              )}
-            </div>
-          </div>
+          {/* Price */}
+          <p
+            className="text-[28px] font-bold text-[#E8321C] mt-4"
+            style={{ fontFamily: 'JetBrains Mono, monospace' }}
+          >
+            ৳{product.price}
+          </p>
 
           {/* Specs Table */}
           <div className="mt-5">
@@ -139,7 +117,7 @@ export default function ProductDetailPanel({ product, onClose }: ProductDetailPa
                     >
                       {key}
                     </td>
-                    <td className="py-2.5 px-3 text-[13px] text-[#111318]">{value}</td>
+                    <td className="py-2.5 px-3 text-[13px] text-[#111318]">{value as React.ReactNode}</td>
                   </tr>
                 ))}
               </tbody>
@@ -167,33 +145,20 @@ export default function ProductDetailPanel({ product, onClose }: ProductDetailPa
               {quantity}
             </span>
             <button
-              onClick={() => setQuantity(Math.min(maxQuantity, quantity + 1))}
-              disabled={quantity >= maxQuantity}
-              className="w-8 h-8 border border-[#E4E6ED] rounded-lg flex items-center justify-center text-[#6B7280] hover:border-[#E8321C] hover:text-[#E8321C] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              onClick={() => setQuantity(quantity + 1)}
+              className="w-8 h-8 border border-[#E4E6ED] rounded-lg flex items-center justify-center text-[#6B7280] hover:border-[#E8321C] hover:text-[#E8321C] transition-colors"
             >
               <Plus size={14} />
             </button>
           </div>
 
-          {/* Stock Warning */}
-          {remainingStock === 0 ? (
-            <p className="text-xs text-[#E8321C] mt-2">
-              All available units are already in your cart
-            </p>
-          ) : quantity >= maxQuantity && maxQuantity > 0 ? (
-            <p className="text-xs text-[#E8321C] mt-2">
-              Only {remainingStock} more units available ({quantityInCart} already in cart)
-            </p>
-          ) : null}
-
           {/* Add to Cart */}
           <button
             onClick={handleAdd}
-            disabled={remainingStock === 0}
-            className="w-full mt-6 bg-[#E8321C] text-white py-3.5 rounded-lg font-bold text-base hover:bg-[#C5290F] transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+            className="w-full mt-6 bg-[#E8321C] text-white py-3.5 rounded-lg font-bold text-base hover:bg-[#C5290F] transition-colors"
             style={{ fontFamily: 'Syne, sans-serif' }}
           >
-            {remainingStock === 0 ? 'All Units in Cart' : 'Add to Cart'}
+            Add to Cart
           </button>
         </div>
       </div>

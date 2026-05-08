@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { ArrowRight } from 'lucide-react';
-import { products, categories } from '@/data';
+import { categories } from '@/data';
+import { useProducts } from '@/hooks/useProducts';
 import Navbar from '@/components/Navbar';
 import ProductCard from '@/components/ProductCard';
 import ProductDetailPanel from '@/components/ProductDetailPanel';
@@ -12,6 +13,7 @@ export default function CustomerHome() {
   const [sortBy, setSortBy] = useState('name-asc');
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const heroRef = useRef<HTMLDivElement>(null);
+  const { products, loading } = useProducts();
 
   const filteredProducts = useMemo(() => {
     let result = [...products];
@@ -37,7 +39,7 @@ export default function CustomerHome() {
     }
 
     return result;
-  }, [activeCategory, searchQuery, sortBy]);
+  }, [activeCategory, searchQuery, sortBy, products]);
 
   return (
     <div className="min-h-screen bg-white">
@@ -155,17 +157,24 @@ export default function CustomerHome() {
         </div>
 
         {/* Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-          {filteredProducts.map(product => (
-            <ProductCard
-              key={product.id}
-              product={product}
-              onClick={() => setSelectedProduct(product)}
-            />
-          ))}
-        </div>
+        {loading ? (
+          <div className="text-center py-16">
+            <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-[#E8321C]"></div>
+            <p className="text-sm text-[#6B7280] mt-4">Loading products...</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+            {filteredProducts.map(product => (
+              <ProductCard
+                key={product.id}
+                product={product}
+                onClick={() => setSelectedProduct(product)}
+              />
+            ))}
+          </div>
+        )}
 
-        {filteredProducts.length === 0 && (
+        {!loading && filteredProducts.length === 0 && (
           <div className="text-center py-16">
             <p className="text-5xl mb-4">{'\u{1F50D}'}</p>
             <h3 className="text-xl font-bold text-[#111318]" style={{ fontFamily: 'Syne, sans-serif' }}>

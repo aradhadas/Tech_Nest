@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, User, Store, Shield } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import PixelArcLogo from '@/components/PixelArcLogo';
 import type { UserRole } from '@/types';
@@ -17,14 +17,14 @@ export default function Register() {
   const [role, setRole] = useState<UserRole>('customer');
   const [error, setError] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     if (password !== confirmPassword) {
       setError('Passwords do not match');
       return;
     }
-    const success = register(name, email, phone, password, role);
+    const success = await register(name, email, phone, password, role);
     if (success) {
       if (role === 'vendor') {
         navigate('/vendor/dashboard');
@@ -38,10 +38,10 @@ export default function Register() {
     }
   };
 
-  const roles: { value: UserRole; label: string; icon: string; desc: string }[] = [
-    { value: 'customer', label: 'Customer', icon: '\u{1F6CD}', desc: 'Buy kits' },
-    { value: 'vendor', label: 'Vendor', icon: '\u{1F3EA}', desc: 'Sell products' },
-    { value: 'admin', label: 'Admin', icon: '\u{1F527}', desc: 'Manage all' },
+  const roles: { value: UserRole; label: string; icon: React.ReactNode; desc: string }[] = [
+    { value: 'customer', label: 'Customer', icon: <User size={20} strokeWidth={1.5} />, desc: 'Buy kits' },
+    { value: 'vendor', label: 'Vendor', icon: <Store size={20} strokeWidth={1.5} />, desc: 'Sell products' },
+    { value: 'admin', label: 'Admin', icon: <Shield size={20} strokeWidth={1.5} />, desc: 'Manage all' },
   ];
 
   return (
@@ -118,22 +118,26 @@ export default function Register() {
 
           {/* Role Selector */}
           <div className="mt-4">
-            <p className="text-xs text-[#6B7280] mb-2">Select Role</p>
+            <p className="text-xs text-[#6B7280] mb-2 font-medium">Select Account Type</p>
             <div className="grid grid-cols-3 gap-2">
               {roles.map(r => (
                 <button
                   key={r.value}
                   type="button"
                   onClick={() => setRole(r.value)}
-                  className={`flex flex-col items-center gap-1 p-3 rounded-xl border-2 transition-all ${
+                  className={`flex flex-col items-center justify-center gap-1.5 p-3 rounded-xl border transition-all duration-200 ${
                     role === r.value
-                      ? 'border-[#E8321C] bg-[#FFF0EE]'
-                      : 'border-[#E4E6ED] hover:border-[#E8321C]'
+                      ? 'border-[#E8321C] bg-[#FFF0EE] text-[#E8321C]'
+                      : 'border-[#E4E6ED] bg-white text-[#6B7280] hover:border-[#B0B7C3] hover:bg-[#F7F8FA]'
                   }`}
                 >
-                  <span className="text-xl">{r.icon}</span>
-                  <span className="text-xs font-medium text-[#111318]">{r.label}</span>
-                  <span className="text-[10px] text-[#6B7280]">{r.desc}</span>
+                  <div className={`${role === r.value ? 'text-[#E8321C]' : 'text-[#8B93A6]'}`}>
+                    {r.icon}
+                  </div>
+                  <span className={`text-xs font-bold ${role === r.value ? 'text-[#E8321C]' : 'text-[#111318]'}`}>
+                    {r.label}
+                  </span>
+                  <span className="text-[10px] text-[#8B93A6] whitespace-nowrap">{r.desc}</span>
                 </button>
               ))}
             </div>

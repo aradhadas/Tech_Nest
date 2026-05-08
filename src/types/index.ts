@@ -58,10 +58,10 @@ export interface Order {
   status: OrderStatus;
   date: string;
   customerName?: string;
-  customerId?: string;
+  customerId?: string | null;
   deliveryAddress?: string;
   deliveryPhone?: string;
-  vendorId?: string;
+  vendorId?: string | null;
 }
 
 export interface Toast {
