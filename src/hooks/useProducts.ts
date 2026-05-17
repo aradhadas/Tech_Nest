@@ -9,7 +9,30 @@ export function useProducts(filterActive: boolean = true) {
 
   useEffect(() => {
     fetchProducts();
-  }, []);
+
+    // Subscribe to real-time changes
+    const channel = supabase
+      .channel('products-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'products'
+        },
+        (payload) => {
+          console.log('Product change detected:', payload);
+          // Refetch products when any change occurs
+          fetchProducts();
+        }
+      )
+      .subscribe();
+
+    // Cleanup subscription on unmount
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [filterActive]);
 
   async function fetchProducts() {
     try {

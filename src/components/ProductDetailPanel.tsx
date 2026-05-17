@@ -147,9 +147,11 @@ export default function ProductDetailPanel({ product, onClose }: ProductDetailPa
           </div>
 
           {/* Description */}
-          <p className="text-sm text-[#6B7280] mt-4 leading-relaxed">
-            Complete DIY kit including PCB, components, and step-by-step instructions. Perfect for learning and prototyping. All components are pre-sorted and labeled for easy assembly.
-          </p>
+          {product.description && (
+            <p className="text-sm text-[#6B7280] mt-4 leading-relaxed">
+              {product.description}
+            </p>
+          )}
 
           {/* Quantity */}
           <div className="flex items-center gap-3 mt-6">

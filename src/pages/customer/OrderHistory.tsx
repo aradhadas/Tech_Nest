@@ -1,12 +1,14 @@
 import { useState } from 'react';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { useOrders } from '@/hooks/useOrders';
+import { useAuth } from '@/contexts/AuthContext';
 import Navbar from '@/components/Navbar';
 import StatusChip from '@/components/StatusChip';
 
 export default function OrderHistory() {
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
-  const { orders } = useOrders();
+  const { user } = useAuth();
+  const { orders } = useOrders(user?.id);
 
   return (
     <div className="min-h-screen bg-white">

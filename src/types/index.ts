@@ -37,6 +37,7 @@ export interface Product {
   description?: string;
   status: 'active' | 'inactive';
   image?: string;
+  vendorId?: string;
 }
 
 export interface CartItem {

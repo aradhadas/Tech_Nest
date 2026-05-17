@@ -37,20 +37,42 @@ export default function Checkout() {
     try {
       const fullAddress = `${form.address}, ${form.city || ''} ${form.postalCode || ''}`.trim();
       
-      const { data, error } = await createOrder({
-        customerId: user?.id || null,
-        customerName: form.name,
-        items: items,
-        total: totalPrice,
-        status: 'pending',
-        date: new Date().toISOString(),
-        deliveryAddress: fullAddress,
-        deliveryPhone: form.phone,
-        vendorId: undefined,
+      // Group cart items by vendor
+      const itemsByVendor = items.reduce((acc, item) => {
+        const vendorId = item.product.vendorId || 'no-vendor';
+        if (!acc[vendorId]) {
+          acc[vendorId] = [];
+        }
+        acc[vendorId].push(item);
+        return acc;
+      }, {} as Record<string, typeof items>);
+
+      // Create separate order for each vendor
+      const orderPromises = Object.entries(itemsByVendor).map(async ([vendorId, vendorItems]) => {
+        const vendorTotal = vendorItems.reduce(
+          (sum, item) => sum + item.product.price * item.quantity,
+          0
+        );
+
+        return createOrder({
+          customerId: user?.id || null,
+          customerName: form.name,
+          items: vendorItems,
+          total: vendorTotal,
+          status: 'pending',
+          date: new Date().toISOString(),
+          deliveryAddress: fullAddress,
+          deliveryPhone: form.phone,
+          vendorId: vendorId === 'no-vendor' ? null : vendorId,
+        });
       });
 
-      if (error) {
-        addToast(error, 'error');
+      const results = await Promise.all(orderPromises);
+      
+      // Check if any order failed
+      const failedOrder = results.find(result => result.error);
+      if (failedOrder) {
+        addToast(failedOrder.error || 'Failed to place order', 'error');
         setIsPlacingOrder(false);
         return;
       }
@@ -59,9 +81,12 @@ export default function Checkout() {
       await updateProductStocks();
 
       clearCart();
+      
+      // Navigate to confirmation with all order IDs
+      const orderIds = results.map(r => r.data?.id).filter(Boolean);
       navigate('/customer/confirmation', { 
         state: { 
-          orderId: data?.id, 
+          orderIds,
           items, 
           total: totalPrice 
         } 

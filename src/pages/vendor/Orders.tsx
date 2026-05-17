@@ -1,13 +1,15 @@
 import { useState } from 'react';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { useOrders } from '@/hooks/useOrders';
+import { useAuth } from '@/contexts/AuthContext';
 import Sidebar from '@/components/Sidebar';
 import StatusChip from '@/components/StatusChip';
 import { useToast } from '@/contexts/ToastContext';
 
 export default function VendorOrders() {
   const { addToast } = useToast();
-  const { orders, loading, error, updateOrderStatus } = useOrders();
+  const { user } = useAuth();
+  const { orders, loading, error, updateOrderStatus } = useOrders(undefined, user?.id);
   const [expandedOrders, setExpandedOrders] = useState<Set<string>>(new Set());
 
   const toggleExpand = (orderId: string) => {

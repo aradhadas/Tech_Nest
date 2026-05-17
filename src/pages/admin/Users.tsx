@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Search } from 'lucide-react';
-import { demoUsers } from '@/data';
+import { useUsers } from '@/hooks/useUsers';
 import Sidebar from '@/components/Sidebar';
 import StatusChip from '@/components/StatusChip';
 import { useToast } from '@/contexts/ToastContext';
@@ -10,7 +10,7 @@ export default function AdminUsers() {
   const { addToast } = useToast();
   const [search, setSearch] = useState('');
   const [roleFilter, setRoleFilter] = useState<UserRole | 'all'>('all');
-  const [users, setUsers] = useState(demoUsers);
+  const { users, updateUserStatus } = useUsers();
 
   const filteredUsers = users.filter(u => {
     const matchesSearch = !search || u.name.toLowerCase().includes(search.toLowerCase()) || u.email.toLowerCase().includes(search.toLowerCase());
@@ -18,15 +18,18 @@ export default function AdminUsers() {
     return matchesSearch && matchesRole;
   });
 
-  const toggleStatus = (userId: string) => {
-    setUsers(prev => prev.map(u => {
-      if (u.id === userId) {
-        const newStatus = u.status === 'active' ? 'suspended' : 'active';
-        addToast(`User ${newStatus === 'active' ? 'reactivated' : 'suspended'}`, newStatus === 'active' ? 'success' : 'info');
-        return { ...u, status: newStatus };
-      }
-      return u;
-    }));
+  const toggleStatus = async (userId: string) => {
+    const user = users.find(u => u.id === userId);
+    if (!user) return;
+    
+    const newStatus = user.status === 'active' ? 'suspended' : 'active';
+    const result = await updateUserStatus(userId, newStatus);
+    
+    if (result.success) {
+      addToast(`User ${newStatus === 'active' ? 'reactivated' : 'suspended'}`, newStatus === 'active' ? 'success' : 'info');
+    } else {
+      addToast(result.error || 'Failed to update user status', 'error');
+    }
   };
 
   const tabs: { label: string; value: UserRole | 'all' }[] = [

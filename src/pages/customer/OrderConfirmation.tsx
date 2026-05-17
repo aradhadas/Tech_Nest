@@ -3,7 +3,8 @@ import { Check, ShoppingBag } from 'lucide-react';
 import type { CartItem } from '@/types';
 
 interface LocationState {
-  orderId: string;
+  orderIds?: string[];
+  orderId?: string; // Keep for backward compatibility
   items: CartItem[];
   total: number;
 }
@@ -21,7 +22,9 @@ export default function OrderConfirmation() {
     );
   }
 
-  const { orderId, items, total } = state;
+  const { orderIds, orderId, items, total } = state;
+  const displayOrderIds = orderIds || (orderId ? [orderId] : []);
+  const multipleOrders = displayOrderIds.length > 1;
 
   return (
     <div className="min-h-screen bg-white flex items-center justify-center relative overflow-hidden">
@@ -60,15 +63,32 @@ export default function OrderConfirmation() {
           className="text-2xl font-bold text-[#111318] mt-5"
           style={{ fontFamily: 'Syne, sans-serif', animation: 'fadeInUp 300ms 100ms both' }}
         >
-          Order Placed!
+          {multipleOrders ? 'Orders Placed!' : 'Order Placed!'}
         </h2>
 
-        <p
-          className="text-lg font-bold text-[#E8321C] mt-2"
-          style={{ fontFamily: 'JetBrains Mono, monospace', animation: 'fadeInUp 300ms 200ms both' }}
-        >
-          #{orderId}
-        </p>
+        {multipleOrders ? (
+          <div className="mt-3 space-y-1">
+            {displayOrderIds.map((id, index) => (
+              <p
+                key={id}
+                className="text-sm font-bold text-[#E8321C]"
+                style={{ fontFamily: 'JetBrains Mono, monospace', animation: `fadeInUp 300ms ${200 + index * 50}ms both` }}
+              >
+                #{id}
+              </p>
+            ))}
+            <p className="text-xs text-[#6B7280] mt-2">
+              Your cart contained items from multiple vendors, so we created separate orders.
+            </p>
+          </div>
+        ) : (
+          <p
+            className="text-lg font-bold text-[#E8321C] mt-2"
+            style={{ fontFamily: 'JetBrains Mono, monospace', animation: 'fadeInUp 300ms 200ms both' }}
+          >
+            #{displayOrderIds[0]}
+          </p>
+        )}
 
         {/* Items summary */}
         <div
