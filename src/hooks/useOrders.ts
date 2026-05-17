@@ -2,14 +2,37 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import type { Order } from '@/types';
 
-export function useOrders(customerId?: string) {
+export function useOrders(customerId?: string, vendorId?: string) {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchOrders();
-  }, [customerId]);
+
+    // Subscribe to real-time changes
+    const channel = supabase
+      .channel('orders-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'orders'
+        },
+        (payload) => {
+          console.log('Order change detected:', payload);
+          // Refetch orders when any change occurs
+          fetchOrders();
+        }
+      )
+      .subscribe();
+
+    // Cleanup subscription on unmount
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [customerId, vendorId]);
 
   async function fetchOrders() {
     try {
@@ -21,6 +44,10 @@ export function useOrders(customerId?: string) {
 
       if (customerId) {
         query = query.eq('customer_id', customerId);
+      }
+
+      if (vendorId) {
+        query = query.eq('vendor_id', vendorId);
       }
 
       const { data, error } = await query;

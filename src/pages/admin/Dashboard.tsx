@@ -1,16 +1,22 @@
 import { Users, Store, Clock, Package, ShoppingCart, CheckCircle, XCircle } from 'lucide-react';
-import { demoUsers, products, sampleOrders } from '@/data';
+import { useOrders } from '@/hooks/useOrders';
+import { useUsers } from '@/hooks/useUsers';
+import { useProducts } from '@/hooks/useProducts';
 import Sidebar from '@/components/Sidebar';
 import StatusChip from '@/components/StatusChip';
 import { useToast } from '@/contexts/ToastContext';
 
 export default function AdminDashboard() {
   const { addToast } = useToast();
-  const totalUsers = demoUsers.filter(u => u.role === 'customer').length;
-  const totalVendors = demoUsers.filter(u => u.role === 'vendor').length;
-  const pendingApprovals = demoUsers.filter(u => u.role === 'vendor' && u.approvalStatus === 'pending').length;
+  const { orders } = useOrders();
+  const { users, updateApprovalStatus } = useUsers();
+  const { products } = useProducts();
+  
+  const totalUsers = users.filter(u => u.role === 'customer').length;
+  const totalVendors = users.filter(u => u.role === 'vendor').length;
+  const pendingApprovals = users.filter(u => u.role === 'vendor' && u.approvalStatus === 'pending').length;
   const totalProducts = products.length;
-  const totalOrders = sampleOrders.length;
+  const totalOrders = orders.length;
 
   const stats = [
     { label: 'Total Users', value: totalUsers, icon: Users, color: '#2563EB' },
@@ -20,22 +26,30 @@ export default function AdminDashboard() {
     { label: 'Total Orders', value: totalOrders, icon: ShoppingCart, color: '#E8321C' },
   ];
 
-  const pendingVendors = demoUsers.filter(u => u.role === 'vendor' && u.approvalStatus === 'pending');
-  const recentActivity = sampleOrders.slice(0, 5);
+  const pendingVendors = users.filter(u => u.role === 'vendor' && u.approvalStatus === 'pending');
+  const recentActivity = orders.slice(0, 5);
 
-  const handleApprove = (vendorId: string) => {
-    const vendor = demoUsers.find(u => u.id === vendorId);
+  const handleApprove = async (vendorId: string) => {
+    const vendor = users.find(u => u.id === vendorId);
     if (vendor) {
-      vendor.approvalStatus = 'approved';
-      addToast(`Vendor ${vendor.storeName} approved`, 'success');
+      const result = await updateApprovalStatus(vendorId, 'approved');
+      if (result.success) {
+        addToast(`Vendor ${vendor.storeName} approved`, 'success');
+      } else {
+        addToast(result.error || 'Failed to approve vendor', 'error');
+      }
     }
   };
 
-  const handleReject = (vendorId: string) => {
-    const vendor = demoUsers.find(u => u.id === vendorId);
+  const handleReject = async (vendorId: string) => {
+    const vendor = users.find(u => u.id === vendorId);
     if (vendor) {
-      vendor.approvalStatus = 'rejected';
-      addToast(`Vendor ${vendor.storeName} rejected`, 'error');
+      const result = await updateApprovalStatus(vendorId, 'rejected');
+      if (result.success) {
+        addToast(`Vendor ${vendor.storeName} rejected`, 'error');
+      } else {
+        addToast(result.error || 'Failed to reject vendor', 'error');
+      }
     }
   };
 

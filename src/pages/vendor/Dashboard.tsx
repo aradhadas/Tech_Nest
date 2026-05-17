@@ -1,20 +1,39 @@
 import { ShoppingBag, Package, Clock, CheckCircle, Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { products, sampleOrders } from '@/data';
+import { useOrders } from '@/hooks/useOrders';
+import { useProducts } from '@/hooks/useProducts';
+import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/contexts/ToastContext';
 import Sidebar from '@/components/Sidebar';
 import StatusChip from '@/components/StatusChip';
 
 export default function VendorDashboard() {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const { addToast } = useToast();
+  const { orders, updateOrderStatus } = useOrders(undefined, user?.id);
+  const { products } = useProducts();
+  
+  // Filter products by vendor
+  const vendorProducts = products.filter(p => p.vendorId === user?.id);
 
   const stats = [
-    { label: 'Total Products', value: products.length, icon: ShoppingBag, color: '#E8321C' },
-    { label: 'Active', value: products.filter(p => p.status === 'active').length, icon: Package, color: '#2563EB' },
-    { label: 'Pending Orders', value: sampleOrders.filter(o => o.status === 'pending').length, icon: Clock, color: '#D97706' },
-    { label: 'Completed', value: sampleOrders.filter(o => o.status === 'delivered').length, icon: CheckCircle, color: '#16A34A' },
+    { label: 'Total Products', value: vendorProducts.length, icon: ShoppingBag, color: '#E8321C' },
+    { label: 'Active', value: vendorProducts.filter(p => p.status === 'active').length, icon: Package, color: '#2563EB' },
+    { label: 'Pending Orders', value: orders.filter(o => o.status === 'pending').length, icon: Clock, color: '#D97706' },
+    { label: 'Completed', value: orders.filter(o => o.status === 'delivered').length, icon: CheckCircle, color: '#16A34A' },
   ];
 
-  const recentOrders = sampleOrders.slice(0, 5);
+  const recentOrders = orders.slice(0, 5);
+
+  const handleStatusUpdate = async (orderId: string, newStatus: string) => {
+    const result = await updateOrderStatus(orderId, newStatus as any);
+    if (result.error) {
+      addToast(result.error, 'error');
+      return;
+    }
+    addToast(`Order ${orderId} updated to ${newStatus}`, 'success');
+  };
 
   return (
     <div className="min-h-screen bg-[#F7F8FA]">
@@ -97,12 +116,10 @@ export default function VendorDashboard() {
                 <div className="relative">
                   <select
                     className="w-full text-sm border border-[#E4E6ED] rounded-lg px-3 py-1.5 focus:outline-none focus:border-[#E8321C] bg-white appearance-none cursor-pointer"
-                    defaultValue={order.status}
-                    onChange={(e) => {
-                      order.status = e.target.value as any;
-                    }}
+                    value={order.status}
+                    onChange={(e) => handleStatusUpdate(order.id, e.target.value)}
                   >
-                    <option value="pending">Processing</option>
+                    <option value="pending">Pending</option>
                     <option value="processing">Processing</option>
                     <option value="shipped">Shipped</option>
                     <option value="delivered">Delivered</option>
@@ -133,12 +150,10 @@ export default function VendorDashboard() {
                 <div className="relative">
                   <select
                     className="w-full text-sm border border-[#E4E6ED] rounded-lg px-4 py-2.5 focus:outline-none focus:border-[#E8321C] bg-white appearance-none cursor-pointer"
-                    defaultValue={order.status}
-                    onChange={(e) => {
-                      order.status = e.target.value as any;
-                    }}
+                    value={order.status}
+                    onChange={(e) => handleStatusUpdate(order.id, e.target.value)}
                   >
-                    <option value="pending">Processing</option>
+                    <option value="pending">Pending</option>
                     <option value="processing">Processing</option>
                     <option value="shipped">Shipped</option>
                     <option value="delivered">Delivered</option>

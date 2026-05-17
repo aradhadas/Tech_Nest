@@ -20,12 +20,20 @@ export default function Register() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    
+    // Validate password length
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters long');
+      return;
+    }
+    
     if (password !== confirmPassword) {
       setError('Passwords do not match');
       return;
     }
-    const success = await register(name, email, phone, password, role);
-    if (success) {
+    
+    const result = await register(name, email, phone, password, role);
+    if (result.success) {
       if (role === 'vendor') {
         navigate('/vendor/dashboard');
       } else if (role === 'admin') {
@@ -34,7 +42,7 @@ export default function Register() {
         navigate('/customer/home');
       }
     } else {
-      setError('Email already exists');
+      setError(result.error || 'Registration failed');
     }
   };
 

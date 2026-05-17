@@ -1,4 +1,4 @@
-import type { Category, Product, User, Order } from '@/types';
+import type { Category, Product, User } from '@/types';
 
 export const categories: Category[] = [
   { id: 'cat-001', name: 'LED & Light Projects', icon: '💡', color: '#F59E0B', description: 'LED circuits, light sensors, and lighting projects' },
@@ -72,12 +72,4 @@ export const demoUsers: User[] = [
   { id:'u3', name:'Admin User', email:'admin@demo.com', role:'admin', phone:'01912345678', joinedDate:'2026-01-01', status:'active' },
   { id:'u4', name:'New Vendor', email:'pending@demo.com', role:'vendor', approvalStatus:'pending', storeName:'New Electronics Shop', storeDescription:'Waiting for admin approval to start selling.', phone:'01612345678', joinedDate:'2026-05-06', status:'active' },
   { id:'u5', name:'Sadia Rahman', email:'sadia@demo.com', role:'customer', phone:'01512345678', address:'45 Gulshan, Dhaka', joinedDate:'2026-03-10', status:'active' },
-];
-
-export const sampleOrders: Order[] = [
-  { id:'TN-00001', items:[{ product: products[0], quantity:2 }, { product: products[4], quantity:1 }], total:660, status:'delivered', date:'2026-04-12', customerName:'Rahim Ahmed', customerId:'u1', deliveryAddress:'12/A Dhanmondi, Dhaka', deliveryPhone:'01712345678' },
-  { id:'TN-00002', items:[{ product: products[12], quantity:1 }], total:680, status:'shipped', date:'2026-04-28', customerName:'Sadia Rahman', customerId:'u5', deliveryAddress:'45 Gulshan, Dhaka', deliveryPhone:'01512345678' },
-  { id:'TN-00003', items:[{ product: products[38], quantity:1 }, { product: products[37], quantity:1 }], total:1270, status:'processing', date:'2026-05-01', customerName:'Rahim Ahmed', customerId:'u1', deliveryAddress:'12/A Dhanmondi, Dhaka', deliveryPhone:'01712345678' },
-  { id:'TN-00004', items:[{ product: products[21], quantity:1 }], total:520, status:'pending', date:'2026-05-05', customerName:'Sadia Rahman', customerId:'u5', deliveryAddress:'45 Gulshan, Dhaka', deliveryPhone:'01512345678' },
-  { id:'TN-00005', items:[{ product: products[6], quantity:3 }], total:720, status:'cancelled', date:'2026-04-20', customerName:'Rahim Ahmed', customerId:'u1', deliveryAddress:'12/A Dhanmondi, Dhaka', deliveryPhone:'01712345678' },
 ];

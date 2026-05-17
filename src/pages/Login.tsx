@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, User, Store, Shield } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
@@ -7,12 +7,25 @@ import type { UserRole } from '@/types';
 
 export default function Login() {
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { login, user } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [role, setRole] = useState<UserRole>('customer');
   const [error, setError] = useState('');
+
+  // Redirect based on user role after login
+  useEffect(() => {
+    if (user) {
+      if (user.role === 'vendor') {
+        navigate('/vendor/dashboard');
+      } else if (user.role === 'admin') {
+        navigate('/admin/dashboard');
+      } else {
+        navigate('/customer/home');
+      }
+    }
+  }, [user, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,9 +34,10 @@ export default function Login() {
     const result = await login(email, password);
     
     if (result.success) {
-      // Navigation will be handled by AuthContext based on user role
-      // For now, just redirect to customer home
-      navigate('/customer/home');
+      // Wait a moment for user context to be set
+      setTimeout(() => {
+        // This will be handled by the useEffect below
+      }, 100);
     } else {
       setError(result.error || 'Invalid credentials');
     }

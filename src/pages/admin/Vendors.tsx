@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { CheckCircle, XCircle, Clock } from 'lucide-react';
-import { demoUsers } from '@/data';
+import { useUsers } from '@/hooks/useUsers';
 import Sidebar from '@/components/Sidebar';
 import StatusChip from '@/components/StatusChip';
 import { useToast } from '@/contexts/ToastContext';
@@ -8,29 +8,48 @@ import { useToast } from '@/contexts/ToastContext';
 export default function AdminVendors() {
   const { addToast } = useToast();
   const [activeTab, setActiveTab] = useState<'pending' | 'all'>('pending');
-  const [vendors, setVendors] = useState(demoUsers.filter(u => u.role === 'vendor'));
-
+  const { users, updateApprovalStatus, updateUserStatus } = useUsers();
+  
+  const vendors = users.filter(u => u.role === 'vendor');
   const pendingVendors = vendors.filter(v => v.approvalStatus === 'pending');
   const allVendors = vendors;
 
-  const handleApprove = (vendorId: string) => {
-    setVendors(prev => prev.map(v => {
-      if (v.id === vendorId) {
-        addToast(`Vendor ${v.storeName} approved`, 'success');
-        return { ...v, approvalStatus: 'approved' as const };
-      }
-      return v;
-    }));
+  const handleApprove = async (vendorId: string) => {
+    const vendor = vendors.find(v => v.id === vendorId);
+    if (!vendor) return;
+    
+    const result = await updateApprovalStatus(vendorId, 'approved');
+    if (result.success) {
+      addToast(`Vendor ${vendor.storeName} approved`, 'success');
+    } else {
+      addToast(result.error || 'Failed to approve vendor', 'error');
+    }
   };
 
-  const handleReject = (vendorId: string) => {
-    setVendors(prev => prev.map(v => {
-      if (v.id === vendorId) {
-        addToast(`Vendor ${v.storeName} rejected`, 'error');
-        return { ...v, approvalStatus: 'rejected' as const };
-      }
-      return v;
-    }));
+  const handleReject = async (vendorId: string) => {
+    const vendor = vendors.find(v => v.id === vendorId);
+    if (!vendor) return;
+    
+    const result = await updateApprovalStatus(vendorId, 'rejected');
+    if (result.success) {
+      addToast(`Vendor ${vendor.storeName} rejected`, 'error');
+    } else {
+      addToast(result.error || 'Failed to reject vendor', 'error');
+    }
+  };
+
+  const handleToggleStatus = async (vendorId: string) => {
+    const vendor = vendors.find(v => v.id === vendorId);
+    if (!vendor) return;
+    
+    const newStatus = vendor.status === 'active' ? 'suspended' : 'active';
+    const result = await updateUserStatus(vendorId, newStatus);
+    
+    if (result.success) {
+      addToast(`Vendor ${newStatus === 'active' ? 'reactivated' : 'suspended'}`, newStatus === 'active' ? 'success' : 'info');
+    } else {
+      addToast(result.error || 'Failed to update vendor status', 'error');
+    }
   };
 
   return (
@@ -159,20 +178,14 @@ export default function AdminVendors() {
                   <div className="lg:col-span-3 mt-3 lg:mt-0">
                     {vendor.status === 'active' ? (
                       <button
-                        onClick={() => {
-                          vendor.status = 'suspended';
-                          addToast('Vendor suspended', 'info');
-                        }}
+                        onClick={() => handleToggleStatus(vendor.id)}
                         className="w-full lg:w-auto text-xs font-semibold px-4 py-2 border border-[#E4E6ED] rounded-lg hover:border-[#E8321C] hover:text-[#E8321C] transition-colors"
                       >
                         Suspend Vendor
                       </button>
                     ) : (
                       <button
-                        onClick={() => {
-                          vendor.status = 'active';
-                          addToast('Vendor reactivated', 'success');
-                        }}
+                        onClick={() => handleToggleStatus(vendor.id)}
                         className="w-full lg:w-auto text-xs font-semibold px-4 py-2 bg-[#E8321C] text-white rounded-lg hover:bg-[#C5290F] transition-colors"
                       >
                         Reactivate Vendor

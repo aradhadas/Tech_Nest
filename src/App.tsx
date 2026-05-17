@@ -1,9 +1,11 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import ToastContainer from '@/components/ToastContainer';
+import ProtectedRoute from '@/components/ProtectedRoute';
 
 // Auth pages
 import Login from '@/pages/Login';
 import Register from '@/pages/Register';
+import TestLogin from '@/pages/TestLogin';
 
 // Customer pages
 import CustomerHome from '@/pages/customer/Home';
@@ -32,26 +34,111 @@ function App() {
         {/* Public routes */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/test-login" element={<TestLogin />} />
 
-        {/* Customer routes - No auth required for now */}
+        {/* Customer routes - Public access for browsing */}
         <Route path="/customer/home" element={<CustomerHome />} />
         <Route path="/customer/cart" element={<Cart />} />
-        <Route path="/customer/checkout" element={<Checkout />} />
-        <Route path="/customer/confirmation" element={<OrderConfirmation />} />
-        <Route path="/customer/orders" element={<OrderHistory />} />
-        <Route path="/customer/profile" element={<Profile />} />
+        <Route 
+          path="/customer/checkout" 
+          element={
+            <ProtectedRoute requireAuth={false}>
+              <Checkout />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/customer/confirmation" 
+          element={
+            <ProtectedRoute requireAuth={false}>
+              <OrderConfirmation />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/customer/orders" 
+          element={
+            <ProtectedRoute allowedRoles={['customer']}>
+              <OrderHistory />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/customer/profile" 
+          element={
+            <ProtectedRoute allowedRoles={['customer']}>
+              <Profile />
+            </ProtectedRoute>
+          } 
+        />
 
-        {/* Vendor routes - No auth required for now */}
-        <Route path="/vendor/dashboard" element={<VendorDashboard />} />
-        <Route path="/vendor/products" element={<VendorProducts />} />
-        <Route path="/vendor/orders" element={<VendorOrders />} />
+        {/* Vendor routes - Protected */}
+        <Route 
+          path="/vendor/dashboard" 
+          element={
+            <ProtectedRoute allowedRoles={['vendor']}>
+              <VendorDashboard />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/vendor/products" 
+          element={
+            <ProtectedRoute allowedRoles={['vendor']}>
+              <VendorProducts />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/vendor/orders" 
+          element={
+            <ProtectedRoute allowedRoles={['vendor']}>
+              <VendorOrders />
+            </ProtectedRoute>
+          } 
+        />
 
-        {/* Admin routes - No auth required for now */}
-        <Route path="/admin/dashboard" element={<AdminDashboard />} />
-        <Route path="/admin/users" element={<AdminUsers />} />
-        <Route path="/admin/vendors" element={<AdminVendors />} />
-        <Route path="/admin/categories" element={<AdminCategories />} />
-        <Route path="/admin/orders" element={<AdminOrders />} />
+        {/* Admin routes - Protected */}
+        <Route 
+          path="/admin/dashboard" 
+          element={
+            <ProtectedRoute allowedRoles={['admin']}>
+              <AdminDashboard />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/admin/users" 
+          element={
+            <ProtectedRoute allowedRoles={['admin']}>
+              <AdminUsers />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/admin/vendors" 
+          element={
+            <ProtectedRoute allowedRoles={['admin']}>
+              <AdminVendors />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/admin/categories" 
+          element={
+            <ProtectedRoute allowedRoles={['admin']}>
+              <AdminCategories />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/admin/orders" 
+          element={
+            <ProtectedRoute allowedRoles={['admin']}>
+              <AdminOrders />
+            </ProtectedRoute>
+          } 
+        />
 
         {/* Redirect root to customer home */}
         <Route path="/" element={<Navigate to="/customer/home" replace />} />
