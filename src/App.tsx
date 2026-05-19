@@ -140,9 +140,9 @@ function App() {
           } 
         />
 
-        {/* Redirect root to customer home */}
-        <Route path="/" element={<Navigate to="/customer/home" replace />} />
-        <Route path="*" element={<Navigate to="/customer/home" replace />} />
+        {/* Redirect public entry points to authentication */}
+        <Route path="/" element={<Navigate to="/login" replace />} />
+        <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
 
       <ToastContainer />
